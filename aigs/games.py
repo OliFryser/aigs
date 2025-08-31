@@ -15,9 +15,51 @@ class ConnectFour(Env):
         state = State(board=board, legal=legal)
         return state
 
-    def step(self, state, action) -> State:
+    def step(self, state: State, action) -> State:
         # hint: use x.diagonal(i)
-        raise NotImplementedError
+
+        # place piece
+        board = state.board.copy()
+        piecePosition: tuple[int, int] = (-1, -1)
+
+        column = board[:, action]
+        assert column[0] == 0
+
+        for i in range(5, -1, -1):
+            if column[i] == 0:
+                board[i, action] = 1 if state.maxim else -1
+                piecePosition = (i, action)
+                break
+
+        mask = board == 1 if state.maxim else -1
+        winner: bool = self.checkForWinner(mask, piecePosition)
+
+        return State(
+            board,
+            legal=board[0] == 0,
+            ended=(board != 0).all() | winner,
+            point=(1 if state.maxim else -1) if winner else 0,
+            maxim=not state.maxim,
+        )
+
+    def checkForWinner(self, mask, piecePostion: tuple[int, int]) -> bool:
+        # Check its row column and diagonal vectors for 4 matching pieces in a row
+        row = mask[piecePostion[0]]
+        column = mask.T[piecePostion[1]]
+        rightDiagonals = [mask.diagonal(i) for i in range(-6, 7)]
+        leftDiagonals = [mask.T.diagonal(i) for i in range(-6, 7)]
+        lst = [self.checkFourConnectingPieces(v) for v in [row] + [column] + rightDiagonals + leftDiagonals]
+        return True in lst
+
+    def checkFourConnectingPieces(self, v) -> bool:
+        if len(v) < 4:
+            return False
+
+        for i in range(len(v) - 3):
+            if v[i] and v[i + 1] and v[i + 2] and v[i + 3]:
+                return True
+
+        return False
 
 
 # tic tac toe
