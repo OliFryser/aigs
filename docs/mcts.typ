@@ -75,6 +75,7 @@ or whatever.) You have to:
 - Modify the function to return winner if terminated or heuristic value of depth
   is 0
 - Think about how a neural network could be used here
+- Send your heuristic function to Noah and we'll have a competition
 
 
 

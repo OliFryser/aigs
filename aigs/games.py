@@ -7,6 +7,17 @@ from aigs.types import State, Env
 import numpy as np
 
 
+def connect_four_test(v):
+    if len(v) < 4:
+        return False
+
+    for i in range(len(v) - 3):
+        if v[i] and v[i + 1] and v[i + 2] and v[i + 3]:
+            return True
+    else:
+        return False
+
+
 # connect four
 class ConnectFour(Env):
     def init(self) -> State:
@@ -15,51 +26,33 @@ class ConnectFour(Env):
         state = State(board=board, legal=legal)
         return state
 
-    def step(self, state: State, action) -> State:
-        # hint: use x.diagonal(i)
-
+    def step(self, state, action) -> State:
         # place piece
         board = state.board.copy()
-        piecePosition: tuple[int, int] = (-1, -1)
+        col = board[:, action]  # <- a vector
+        assert col[0] == 0
+        row = np.where(col == 0)[0][-1]
+        board[row, action] = 1 if state.maxim else -1
 
-        column = board[:, action]
-        assert column[0] == 0
+        # detect winner
+        mask = board == (1 if state.maxim else -1)
+        rows = [row for row in mask]
+        cols = [col for col in mask.T]
+        r_diags = [mask.diagonal(i) for i in range(-6, 7)]
+        l_diags = [mask.T.diagonal(i) for i in range(-7, 6)]
+        lst = [connect_four_test(v) for v in rows + cols + r_diags + l_diags]
 
-        for i in range(5, -1, -1):
-            if column[i] == 0:
-                board[i, action] = 1 if state.maxim else -1
-                piecePosition = (i, action)
-                break
-
-        mask = board == 1 if state.maxim else -1
-        winner: bool = self.checkForWinner(mask, piecePosition)
+        winner = True in lst
+        legal = board[0] == 0
+        point = (1 if state.maxim else -1) if winner else 0
 
         return State(
-            board,
-            legal=board[0] == 0,
-            ended=(board != 0).all() | winner,
-            point=(1 if state.maxim else -1) if winner else 0,
+            board=board,
+            legal=legal,
+            ended=not legal.any() | winner,
+            point=point,
             maxim=not state.maxim,
         )
-
-    def checkForWinner(self, mask, piecePostion: tuple[int, int]) -> bool:
-        # Check its row column and diagonal vectors for 4 matching pieces in a row
-        row = mask[piecePostion[0]]
-        column = mask.T[piecePostion[1]]
-        rightDiagonals = [mask.diagonal(i) for i in range(-6, 7)]
-        leftDiagonals = [mask.T.diagonal(i) for i in range(-6, 7)]
-        lst = [self.checkFourConnectingPieces(v) for v in [row] + [column] + rightDiagonals + leftDiagonals]
-        return True in lst
-
-    def checkFourConnectingPieces(self, v) -> bool:
-        if len(v) < 4:
-            return False
-
-        for i in range(len(v) - 3):
-            if v[i] and v[i + 1] and v[i + 2] and v[i + 3]:
-                return True
-
-        return False
 
 
 # tic tac toe

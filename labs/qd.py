@@ -43,6 +43,8 @@ def archive(state, p):
 
 # %% Setup
 def main(ctx):
+    print("9")
+    exit()
     env, pop = init(ctx.config)
     env._rep._mep = pop[0]
     Image.fromarray(env.render()).save("map.png")
