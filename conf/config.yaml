@@ -10,5 +10,6 @@ mcts:
     game: "connect_four"
     maxim: "human"
     minim: "random"
+    maxDepth: 10
     # compute: 10
     # c: 0.9

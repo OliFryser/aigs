@@ -11,13 +11,14 @@ env: Env
 
 
 # %%
-def minimax(state: State, maxim: bool) -> int:
+def minimax(state: State, maxim: bool, depth: int, maxDepth: int) -> int:
     if state.ended:
         return state.point
     else:
+        depth += 1
         temp: int = -10 if maxim else 10
         for action in np.where(state.legal)[0]:  # for all legal actions
-            value = minimax(env.step(state, action), not maxim)
+            value = minimax(env.step(state, action), not maxim, depth, maxDepth)
             temp = max(temp, value) if maxim else min(temp, value)
         return temp
 
@@ -74,7 +75,7 @@ def main(cfg) -> None:
                 a = int(input(f"Place your piece ({'x' if state.minim else 'o'}): "))
 
             case "minimax":
-                values = [minimax(env.step(state, a), not state.maxim) for a in actions]
+                values = [minimax(env.step(state, a), not state.maxim, 0, 10) for a in actions]
                 a = actions[np.argmax(values) if state.maxim else np.argmin(values)]
 
             case "alpha_beta":
