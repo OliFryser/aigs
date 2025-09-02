@@ -7,7 +7,7 @@ from aigs.types import State, Env
 import numpy as np
 
 
-def connect_four_test(v, state: State):
+def connect_four_test(v):
     if len(v) < 4:
         return False
 
@@ -40,10 +40,9 @@ class ConnectFour(Env):
         cols = [mask.T[action]]
         r_diags = [mask.diagonal(i) for i in range(-6, 7)]
         l_diags = [mask.T.diagonal(i) for i in range(-7, 6)]
-        lst = [connect_four_test(v, state) for v in rows + cols + r_diags + l_diags]
+        lst = [connect_four_test(v) for v in rows + cols + r_diags + l_diags]
 
         winner = True in lst
-        print(winner)
         legal = board[0] == 0
         point = (1 if state.maxim else -1) if winner else 0
 

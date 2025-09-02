@@ -9,7 +9,7 @@ class State:
 
     board: np.ndarray  # game board
     legal: np.ndarray  # mask of leagal moves
-    point: int = 0  # how many points have we earned so far
+    point: float = 0  # how many points have we earned so far
     ended: bool = False  # has the game ended?
     maxim: bool = True  # are we player 1 (maxim) or player 2 (not maxim (minim?))?
 

@@ -9,7 +9,7 @@ qd:
 mcts:
     game: "connect_four"
     maxim: "human"
-    minim: "random"
-    maxDepth: 10
+    minim: "alpha_beta"
+    maxDepth: 5
     # compute: 10
     # c: 0.9
