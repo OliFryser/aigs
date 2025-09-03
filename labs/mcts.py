@@ -113,6 +113,7 @@ def main(_cfg) -> None:
                 a = np.random.choice(actions).item()
 
             case "human":
+                print("  0  1  2  3  4  5  6 ")
                 print(state, end="\n\n")
                 a = int(input(f"Place your piece ({'x' if state.minim else 'o'}): "))
 

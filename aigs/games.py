@@ -39,7 +39,7 @@ class ConnectFour(Env):
         rows = [mask[row]]
         cols = [mask.T[action]]
         r_diags = [mask.diagonal(i) for i in range(-6, 7)]
-        l_diags = [mask.T.diagonal(i) for i in range(-7, 6)]
+        l_diags = [np.fliplr(mask).diagonal(i) for i in range(-6, 7)]
         lst = [connect_four_test(v) for v in rows + cols + r_diags + l_diags]
 
         winner = True in lst
