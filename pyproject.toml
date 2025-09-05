@@ -6,14 +6,10 @@ readme = "README.md"
 requires-python = ">=3.10,<3.11"
 dependencies = [
     "cma>=4.3.0",
-    "equinox>=0.12.2",
-    "flax>=0.10.7",
     "grpcio>=1.73.0",
     "gym-super-mario-bros>=7.4.0",
     "gymnasium>=1.1.1",
-    "jax>=0.6,<0.7",
-    "jaxlib>=0.5.3",
-    "jumanji>=1.1.1",
+    "jax<0.5",
     "mctx>=0.0.5",
     "mlxp>=1.0.4",
     "pettingzoo>=1.25.0",
