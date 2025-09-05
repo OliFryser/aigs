@@ -1,3 +1,3 @@
-from . import mcts, qd
+from . import mcts, qd, nn
 
-__all__ = ["mcts", "qd"]
+__all__ = ["mcts", "qd", "nn"]

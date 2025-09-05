@@ -1,4 +1,4 @@
-task: "mcts"
+task: "nn"
 
 qd:
     n: 10
@@ -13,3 +13,8 @@ mcts:
     maxDepth: 6
     # compute: 10
     # c: 0.9
+
+nn:
+    hidden: 30
+    epochs: 50
+    learning_rate: 0.01
