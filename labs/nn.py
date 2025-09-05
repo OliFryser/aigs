@@ -8,7 +8,7 @@ from jax import grad
 
 mnist = fetch_openml("mnist_784", version=1)
 X = jnp.array(mnist.data.astype("float32"))  # shape (70000, 784)
-y = jnp.array(mnist.target.astype("int64"))  # shape (70000,)
+y = jnp.array(np.eye(10)[mnist.target.astype("int64")])  # shape (70000,)
 
 
 def init_fn(cfg):
