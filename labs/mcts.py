@@ -71,15 +71,26 @@ def alpha_beta(state: State, maxim: bool, alpha: float, beta: float, depth: int)
 @dataclass
 class Node:
     state: State  # Add more fields
+    actions: list[int] = []
 
 
 # Intuitive but difficult in terms of code
 def monte_carlo(state: State, cfg) -> int:
-    raise NotImplementedError  # you do this
+    root = Node(state)
+    currentCompute = 0
+    while currentCompute < cfg.compute:
+        currentNode = tree_policy(root)
+        delta = default_policy(currentNode.state)
+        backup(currentNode, delta)
+
+    return best_child(root, cfg.c).state
 
 
 def tree_policy(node: Node, cfg) -> Node:
-    raise NotImplementedError  # you do this
+    actions = np.where(node.state.legal)[0]
+    while not node.state.ended:
+        if len(actions > 0):
+            action = actions.take(0)
 
 
 def expand(v: Node) -> Node:
