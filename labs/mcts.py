@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import aigs
 from aigs import State, Env
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from omegaconf import DictConfig
 
 
@@ -70,43 +70,74 @@ def alpha_beta(state: State, maxim: bool, alpha: float, beta: float, depth: int)
 
 @dataclass
 class Node:
-    state: State  # Add more fields
-    actions: list[int] = []
+    state: State
+    action: int  # action taken to this node
+    parent: Node | None
+    children: list = field(default_factory=list)  # an action to child node mapping
+    reward: float = 0  # Q(v)
+    visisted: int = 0  # N(v)
+
+
+def expanded(node: Node):
+    legal_actions = np.where(node.state.legal)[0]
+    return len(node.children) == len(legal_actions)
 
 
 # Intuitive but difficult in terms of code
 def monte_carlo(state: State, cfg) -> int:
-    root = Node(state)
+    root = Node(state, -1, None)
     currentCompute = 0
     while currentCompute < cfg.compute:
-        currentNode = tree_policy(root)
+        currentNode = tree_policy(root, cfg)
         delta = default_policy(currentNode.state)
         backup(currentNode, delta)
+        currentCompute += 1
 
-    return best_child(root, cfg.c).state
+    return best_child(root, cfg.c).action
 
 
 def tree_policy(node: Node, cfg) -> Node:
-    actions = np.where(node.state.legal)[0]
     while not node.state.ended:
-        if len(actions > 0):
-            action = actions.take(0)
+        if not expanded(node):
+            return expand(node)
+        else:
+            node = best_child(node, cfg.c)
+    return node
 
 
 def expand(v: Node) -> Node:
-    raise NotImplementedError  # you do this
+    a = np.random.choice(np.where(v.state.legal)[0])
+    new_state = env.step(v.state, a)
+    new_node = Node(new_state, a, v)
+    v.children.append(new_node)
+    return new_node
 
 
 def best_child(root: Node, c) -> Node:
-    raise NotImplementedError  # you do this
+    best_child_so_far = root.children[0]
+    best_uct = 0
+    for node in root.children:
+        uct = (node.reward / node.visisted) + c * np.sqrt(2 * np.log(root.visisted) / node.visisted)
+        if uct > best_uct:
+            best_uct = uct
+            best_child_so_far = node
+
+    return best_child_so_far
 
 
-def default_policy(state: State) -> int:
-    raise NotImplementedError  # you do this
+def default_policy(state: State) -> float:
+    while not state.ended:
+        a = np.random.choice(np.where(state.legal)[0])
+        state = env.step(state, a)
+    return state.point
 
 
-def backup(node, delta) -> None:
-    raise NotImplementedError  # you do this
+def backup(node: Node | None, delta: float) -> None:
+    while node is not None:
+        node.visisted += 1
+        node.reward += delta
+        delta *= -1
+        node = node.parent
 
 
 # Main function
@@ -137,7 +168,7 @@ def main(_cfg) -> None:
                 a = actions[np.argmax(values) if state.maxim else np.argmin(values)]
 
             case "monte_carlo":
-                raise NotImplementedError
+                a = monte_carlo(state, cfg)
 
             case _:
                 raise ValueError(f"Unknown player {state.player}")

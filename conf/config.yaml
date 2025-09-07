@@ -1,4 +1,4 @@
-task: "nn"
+task: "mcts"
 
 qd:
     n: 10
@@ -9,9 +9,9 @@ qd:
 mcts:
     game: "connect_four"
     maxim: "human"
-    minim: "alpha_beta"
+    minim: "monte_carlo"
     maxDepth: 6
-    compute: 10
+    compute: 5000
     c: 0.9
 
 nn:
