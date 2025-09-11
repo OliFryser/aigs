@@ -1,5 +1,6 @@
 # imports
 from __future__ import annotations
+import time
 import numpy as np
 import aigs
 from aigs import State, Env
@@ -86,12 +87,11 @@ def expanded(node: Node):
 # Intuitive but difficult in terms of code
 def monte_carlo(state: State, cfg) -> int:
     root = Node(state, -1, None)
-    currentCompute = 0
-    while currentCompute < cfg.compute:
+    startTime = time.time()
+    while time.time() - startTime < cfg.compute:
         currentNode = tree_policy(root, cfg)
         delta = default_policy(currentNode.state)
         backup(currentNode, delta)
-        currentCompute += 1
 
     return best_child(root, cfg.c).action
 
