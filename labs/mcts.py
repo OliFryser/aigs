@@ -74,9 +74,9 @@ class Node:
     state: State
     action: int  # action taken to this node
     parent: Node | None
-    children: list = field(default_factory=list)  # an action to child node mapping
+    children: list[Node] = field(default_factory=list)  # an action to child node mapping
     reward: float = 0  # Q(v)
-    visisted: int = 0  # N(v)
+    visited: int = 0  # N(v)
 
 
 def expanded(node: Node):
@@ -93,7 +93,7 @@ def monte_carlo(state: State, cfg) -> int:
         delta = default_policy(currentNode.state)
         backup(currentNode, delta)
 
-    return best_child(root, cfg.c).action
+    return best_child(root, 0).action
 
 
 def tree_policy(node: Node, cfg) -> Node:
@@ -106,7 +106,10 @@ def tree_policy(node: Node, cfg) -> Node:
 
 
 def expand(v: Node) -> Node:
-    a = np.random.choice(np.where(v.state.legal)[0])
+    legal_actions = np.where(v.state.legal)[0]
+    tried: set[int] = {child.action for child in v.children}
+    untried: list[int] = [a for a in legal_actions if a not in tried]
+    a: int = np.random.choice(untried)
     new_state = env.step(v.state, a)
     new_node = Node(new_state, a, v)
     v.children.append(new_node)
@@ -114,10 +117,12 @@ def expand(v: Node) -> Node:
 
 
 def best_child(root: Node, c) -> Node:
-    best_child_so_far = root.children[0]
-    best_uct = 0
+    best_child_so_far: Node = root.children[0]
+    best_uct = -float("inf")
     for node in root.children:
-        uct = (node.reward / node.visisted) + c * np.sqrt(2 * np.log(root.visisted) / node.visisted)
+        if node.visited == 0:
+            return node  # force exploration
+        uct = (node.reward / node.visited) + c * np.sqrt(2 * np.log(root.visited) / node.visited)
         if uct > best_uct:
             best_uct = uct
             best_child_so_far = node
@@ -134,7 +139,7 @@ def default_policy(state: State) -> float:
 
 def backup(node: Node | None, delta: float) -> None:
     while node is not None:
-        node.visisted += 1
+        node.visited += 1
         node.reward += delta
         delta *= -1
         node = node.parent
