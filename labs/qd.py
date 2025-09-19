@@ -16,6 +16,13 @@ def griewank_function(pop):  # this is kind of our fitness function (except we a
     return 1 + np.sum(pop**2) / 4000 - np.prod(np.cos(pop / np.sqrt(np.arange(1, pop.size + 1))))
 
 
+def rosenbrock_function(x):
+    acc = 0
+    for i in range(len(x) - 1):
+        acc += 100 * (x[i + 1] - x[i] ** 2) ** 2 + (1 - x[i]) ** 2
+    return acc
+
+
 @partial(np.vectorize, signature="(d)->(d)", excluded=[0])
 def mutate(sigma, pop):  # What are we doing here?
     return pop + np.random.normal(0, sigma, pop.shape)
@@ -27,7 +34,7 @@ def crossover(x1, x2):  # TODO: think about what we are doing here. Is it smart?
 
 
 def step(pop, cfg):
-    loss = griewank_function(pop)
+    loss = np.array([rosenbrock_function(x) for x in pop])
     idxs = np.argsort(loss)[: int(cfg.population * cfg.proportion)]  # select best
     best = np.tile(pop[idxs], (int(cfg.population * cfg.proportion), 1))  # cross over
     pop = crossover(best, best[np.random.permutation(best.shape[0])])  # mutate
@@ -36,21 +43,37 @@ def step(pop, cfg):
 
 # %% Setup
 def main(cfg):
-    pop = np.random.rand(cfg.population, cfg.dimensions)
-    fitnesses = []
-    for gen in range(cfg.generation):
-        break
-        pop, fitness = step(pop, cfg)
-        fitnesses.append(fitness.min())
-        print(f"Generation {gen}: Best fitness = {fitness.min()}")
+    # pop = np.random.rand(cfg.population, cfg.dimensions)
+    # fitnesses = []
+    # for gen in range(cfg.generation):
+    #     pop, fitness = step(pop, cfg)
+    #     fitnesses.append(fitness.min())
+    #     print(f"Generation {gen}: Best fitness = {fitness.min()}")
 
-    env, pop = init_pcgym(cfg)
     # our_plot_function(griewank_function)
     # plt.plot(fitnesses)
     # plt.yscale("log")
     # plt.xlabel("Generation")
     # plt.ylabel("Best Fitness")
     # plt.show()
+
+    env, pop = init_pcgym(cfg)
+
+    # create the levels
+    env._rep._map = pop[0]
+    # random agent
+    terminated = False
+    while True:
+        random_action = env.action_space.sample()
+        print(random_action)
+        observation, reward, terminated, truncated, info = env.step(random_action)
+        img = env.render()
+        if img is not None:
+            plt.imshow(img)
+            fig = plt.gcf()  # get current figure
+            # Option 1: set figure size (in inches)
+            fig.set_size_inches(18, 5)
+            plt.show(block=True)
 
 
 # %% Init population (maps)
